@@ -6,7 +6,6 @@ from flask import Flask
 from threading import Thread
 import os
 
-# --- Flask para manter o bot online ---
 app = Flask('')
 
 @app.route('/')
@@ -20,7 +19,6 @@ def keep_alive():
     t = Thread(target=run)
     t.start()
 
-# --- Configuração do Google Sheets ---
 scope = [
     "https://spreadsheets.google.com/feeds",
     "https://www.googleapis.com/auth/spreadsheets",
@@ -28,7 +26,6 @@ scope = [
     "https://www.googleapis.com/auth/drive"
 ]
 
-# Procura o arquivo JSON de credenciais no diretório atual
 json_file = "ControleAngelotti.json"
 if os.path.exists(json_file):
     creds = ServiceAccountCredentials.from_json_keyfile_name(json_file, scope)
@@ -39,7 +36,6 @@ else:
 
 SPREADSHEET_ID = "1gCnfcx4BMyqpBlM3gSLErEcOAJ6KTiOAfRZhLYitumM"
 
-# --- Configuração do Discord ---
 INTENTS = discord.Intents.default()
 INTENTS.messages = True
 INTENTS.message_content = True
@@ -69,7 +65,6 @@ async def on_message(message):
             await message.channel.send("❌ Erro: Credenciais do Google Sheets não configuradas no servidor.")
         return
 
-    # --- Teste de acesso ---
     if conteudo.startswith('!testar'):
         try:
             spreadsheet = client_sheets.open_by_key(SPREADSHEET_ID)
@@ -79,7 +74,6 @@ async def on_message(message):
             await message.channel.send(f"❌ Erro ao acessar a planilha: {e}")
         return
 
-    # --- Novo SKU ---
     if conteudo.startswith('!NovoSKU') and "Licença:" in conteudo:
         linhas = [l.strip() for l in conteudo.splitlines() if l.strip()]
         if len(linhas) < 4:
@@ -125,7 +119,6 @@ async def on_message(message):
         await message.channel.send("❌ Mensagem não contém 'Licença:' para identificar a aba.")
         return
 
-    # --- Atualizações de status ---
     async def atualizar_status(comando, coluna, texto, sobrescrever=False):
         try:
             linhas = [l.strip() for l in conteudo.splitlines() if l.strip()]
@@ -170,7 +163,6 @@ async def on_message(message):
     if conteudo.startswith('!RevisãoAmostra'):
         await atualizar_status('!RevisãoAmostra', 5, "PEDIDO DE REVISÃO")
 
-# --- Executa o bot ---
 if __name__ == "__main__":
     keep_alive()
     TOKEN = os.getenv("DISCORD_TOKEN")
